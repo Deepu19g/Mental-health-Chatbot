@@ -13,6 +13,7 @@ import random
 intents = json.loads(open('intents.json').read())
 words = pickle.load(open('texts.pkl','rb'))
 classes = pickle.load(open('labels.pkl','rb'))
+
 def clean_up_sentence(sentence):
     # tokenize the pattern - split words into array
     sentence_words = nltk.word_tokenize(sentence)
@@ -47,17 +48,23 @@ def predict_class(sentence, model):
     return return_list
 def getResponse(ints, intents_json):
     tag = ints[0]['intent']
-    
+    emotionfile=open("E:/MANASA-1/emo.txt","w")
     list_of_intents = intents_json['intents']
     
     for i in list_of_intents:
         if(i['tag']== tag):
             print (i['tag'])
+            
+            emotionfile.writelines(i['tag'])
             result = random.choice(i['responses'])
+            emotionfile.close()
             break
-    return result
+    return [result,i['tag']]
+    
 def chatbot_response(msg):
     ints = predict_class(msg, model)
+    
+   
     res = getResponse(ints, intents)
     return res
 from flask import Flask, render_template, request
@@ -69,6 +76,7 @@ def home():
 @app.route("/get")
 def get_bot_response():
     userText = request.args.get('msg')
+    
     return chatbot_response(userText)
 if __name__ == "__main__":
-    app.run()
+     app.run(debug=True, port=4000)
